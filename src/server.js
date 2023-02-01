@@ -24,7 +24,7 @@ let apiStatus = {};
 
 const apiEndpoints = [
   { id: 1, name: 'API 1', endpoint: 'http://api1.com/status' },
-  { id: 2, name: 'API 2', endpoint: 'https://jsonplaceholder.typicode.com/posts/1'},
+  { id: 2, name: 'API 2', endpoint: 'https://jsonplaceholder.typicode.com/posts/1xx'},
   { id: 2.1, name: 'Source API 1', endpoint: 'https://jsonplaceholder.typicode.com/posts/1/comments' },
   { id: 3, name: 'API 3', endpoint: 'https://jsonplaceholder.typicode.com/todos/1'},
   { id: 4, name: 'API 4', endpoint: 'https://jsonplaceholder.typicode.com/posts/1'},
@@ -53,7 +53,7 @@ const monitorApi = async () => {
           lastHealthy: new Date(),
         };
 
-        io.emit('apiStatus', apiStatus);
+        io.emit('apiStatus', apiStatus[id]);
       } else {
         apiStatus[id] = {
           id: id,
@@ -64,7 +64,7 @@ const monitorApi = async () => {
           error: response.status
         };
 
-        io.emit('apiStatus', apiStatus);
+        io.emit('apiStatus', apiStatus[id]);
       }
     } catch (e) {
         console.log("ERROR: ", e.message);
@@ -75,7 +75,7 @@ const monitorApi = async () => {
           endpoint: endpoint,
           error: e.message,
        };
-       io.emit('apiStatus', apiStatus);
+       io.emit('apiStatus', apiStatus[id]);
     }
   }
 

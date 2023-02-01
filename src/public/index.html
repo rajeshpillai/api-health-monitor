@@ -74,10 +74,7 @@
       };
 
       socket.on('apiStatus', (apiStatus) => {
-        
-        for (const id in apiStatus) {
-          updateTable(apiStatus[id]);
-        }
+          updateTable(apiStatus);
       });
       </script>
   </html>
