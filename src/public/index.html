@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+  <html>
+    <head>
+      <title>API Health Status</title>
+      <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+      <script src="/socket.io/socket.io.js"></script>
+    </head>
+    <body>
+      <h1>API Health Status</h1>
+      <table id="api-status-table" border="1">
+        <thead>
+          <tr>
+            <th>API Name</th>
+            <th>Endpoint</th>
+            <th>Status</th>
+            <th>Response Time (ms)</th>
+            <th>Last Healthy</th>
+          </tr>
+        </thead>
+        <tbody id="api-status-table-body">
+        </tbody>
+      </table>
+    </body>
+    <script>
+      const socket = io();
+      socket.on('apiStatus', (apiStatus) => {
+        const apiStatusTableBody = $('#api-status-table-body');
+        apiStatusTableBody.empty();
+        for (const name in apiStatus) {
+          const api = apiStatus[name];
+          const row = `
+            <tr>
+              <td>${name}</td>
+              <td>${api.endpoint}</td>
+              <td>${api.status}</td>
+              <td>${api.responseTime}</td>
+              <td>${api.lastHealthy ? api.lastHealthy.toString() : ''}</td>
+            </tr>
+          `;
+          apiStatusTableBody.append(row);
+        }
+      });
+    </script>
+  </html>
