@@ -129,8 +129,6 @@ const checkApiStatus = async () => {
 }
 
 
-
-
 setTimeout(() => {
   checkApiStatus();
 }, MONITORING_FREQUENCY);
