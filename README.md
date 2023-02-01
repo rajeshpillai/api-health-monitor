@@ -14,8 +14,8 @@ npm start
 ```
 
 # TODOS
-[❌] Externalize the API URL configuration
-[✔️] Inline API end point configuration
-[✔️]  WebSocket Integration
+- [❌] Externalize the API URL configuration
+- [✔️] Inline API end point configuration
+- [✔️]  WebSocket Integration
 
 
