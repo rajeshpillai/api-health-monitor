@@ -29,13 +29,11 @@
       const tableBody = $('#api-body');
 
       // Function to update or add a row to the table
-      const updateTable = (apiStatus) => {
+      const updateTable = (apiStatus, parentId = undefined) => {
         if (_.isEmpty( apiStatus )) return;
 
         let rowId = `api-${_.replace(apiStatus.id, ".", "_")}`;
 
-        // Check if the row exists
-        //let row = $(`#api-${apiStatus.id}`);
         let row = $('#' + rowId);
         console.log(row.attr("id"));
         if (row.length == 0) {
@@ -48,7 +46,13 @@
           row.append($('<td>').text(apiStatus.responseTime));
           row.append($('<td>').text(apiStatus.lastHealthy || ''));
           row.append($('<td>').text(apiStatus.error || ''));
-          tableBody.append(row);
+
+          if (parentId) {
+            console.log("Parent found...", parentId);
+            $("#" + parentId).after(row);
+          } else {
+            tableBody.append(row);
+          }
         } else {
           // Update the existing row
           $(`#api-${apiStatus.id} td:nth-child(3)`).text(apiStatus.status);
@@ -62,7 +66,7 @@
         if (apiStatus.sources) {
           console.log("Checking sources...");
           apiStatus.sources.forEach(source => {
-            updateTable(source);
+            updateTable(source, rowId);
           });
         }
       };
