@@ -3,9 +3,11 @@
     <head>
       <title>API Health Status</title>
       <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
       <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js" integrity="sha512-WFN04846sdKMIP5LKNphMaWzU7YpMyCU245etK3g/2ARYbPK9Ub18eG+ljU96qKRCWh+quCY7yefSmlkQw1ANQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
       <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
       <script src="/socket.io/socket.io.js"></script>
+      <script src="js/anim.js"></script>
     </head>
     <body class="container">
       <h1>API Health Status</h1>
@@ -36,14 +38,14 @@
         let rowId = `api-${_.replace(apiStatus.id, ".", "_")}`;
 
         let row = $('#' + rowId);
-        console.log(row.attr("id"));
+        console.log("Rendering: ", apiStatus);
         if (row.length == 0) {
           // Add a new row if it does not exist
           
           row = $('<tr>').attr('id', rowId);
           row.append($('<td>').text(apiStatus.id));
           row.append($('<td>').text(apiStatus.name));
-          row.append($('<td>').text(apiStatus.status));
+          row.append($('<td>').html(`<span style="display:inline-block" id="${rowId}-status">${apiStatus.status}</span>`));
           row.append($('<td>').text(apiStatus.endpoint));
           row.append($('<td>').text(apiStatus.responseTime));
           row.append($('<td>').text(apiStatus.lastHealthy || ''));
@@ -57,20 +59,15 @@
           }
         } else {
           // Update the existing row
-          $(`#api-${apiStatus.id} td:nth-child(3)`).text(apiStatus.status);
+          $(`#api-${apiStatus.id} td:nth-child(3)`).html(`<span style="display:inline-block" id="${rowId}-status">${apiStatus.status}</span>`);
           $(`#api-${apiStatus.id} td:nth-child(4)`).text(apiStatus.endpoint);
           $(`#api-${apiStatus.id} td:nth-child(5)`).text(apiStatus.responseTime);
           $(`#api-${apiStatus.id} td:nth-child(6)`).text(apiStatus.lastHealthy || '');
           $(`#api-${apiStatus.id} td:nth-child(7)`).text(apiStatus.error || '');
         }
 
-        // Check if there are sources
-        if (apiStatus.sources) {
-          console.log("Checking sources...");
-          for(let z = 0; z < apiStatus.sources.length; z++) {
-            updateTable(apiStatus.sources[z], rowId);
-          }
-        }
+        animateCSS(`#${rowId}-status`, 'swing');
+        
       };
 
       socket.on('apiStatus', (apiStatus) => {

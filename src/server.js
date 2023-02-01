@@ -12,12 +12,9 @@ const StatusIcon = {
   Failure: "💔"
 }
 
-io.on('connection', (socket) => {
-  console.log('a client connected');
+app.use(express.static(__dirname + '/public'));
 
-  // emit the latest API status when a client connects
-  socket.emit('apiStatus', apiStatus);
-});
+
 
 
 let apiStatus = {};
@@ -31,6 +28,14 @@ const apiEndpoints = [
   { id: 5, name: 'API 5', endpoint: 'http://api2.com/status' },
   { id: 6, name: 'API 6', endpoint: 'https://jsonplaceholder.typicode.com/posts/3'},
 ];
+
+io.on('connection', (socket) => {
+  console.log('a client connected');
+
+  // emit the latest API status when a client connects
+  socket.emit('apiStatus', apiStatus);
+});
+
 
 const monitorApi = async () => {
   console.log(`Total API Endpoints ${apiEndpoints.length}`);
