@@ -48,7 +48,7 @@
           row.append($('<td>').text(apiStatus.error || ''));
 
           if (parentId) {
-            console.log("Parent found...", parentId);
+            console.log("Parent found...", parentId, apiStatus);
             $("#" + parentId).after(row);
           } else {
             tableBody.append(row);
@@ -65,9 +65,12 @@
         // Check if there are sources
         if (apiStatus.sources) {
           console.log("Checking sources...");
-          apiStatus.sources.forEach(source => {
-            updateTable(source, rowId);
-          });
+          // apiStatus.sources.forEach(source => {
+          //   updateTable(source, rowId);
+          // });
+          for(let z = 0; z < apiStatus.sources.length; z++) {
+            updateTable(apiStatus.sources[z], rowId);
+          }
         }
       };
 

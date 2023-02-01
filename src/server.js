@@ -4,6 +4,9 @@ const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const axios = require("axios");
 
+
+const MONITORING_FREQUENCY = 5 * 1000; // check API status every 5 seconds
+
 // 💚  ❤️
 
 io.on('connection', (socket) => {
@@ -18,9 +21,8 @@ let apiStatus = {};
 
 const apiEndpoints = [
   { id: 1, name: 'API 1', endpoint: 'https://api1.com/status' },
-  { id: 2, name: 'API 2', endpoint: 'https://api2.com/status', sources: [
+  { id: 2, name: 'API 2', endpoint: 'https://jsonplaceholder.typicode.com/posts/1', sources: [
     { id: 1.1, name: 'Source API 1', endpoint: 'https://api1.com/status' },
-    { id: 1.2, name: 'Source API 2', endpoint: 'https://api2.com/status' },
   ] },
   { id: 3, name: 'API 3', endpoint: 'https://jsonplaceholder.typicode.com/todos/1'},
   { id: 4, name: 'API 4', endpoint: 'https://jsonplaceholder.typicode.com/posts/1'},
@@ -30,7 +32,6 @@ const apiEndpoints = [
 const checkApiStatus = async () => {
   console.log(`Total API Endpoints ${apiEndpoints.length}`);
   for (let i = 0; i < apiEndpoints.length; i++) {
-    console.log(i);
     const api = apiEndpoints[i];
     const { id, name, endpoint, sources } = api;
     console.log(`Checking ${name}...`);
@@ -81,6 +82,7 @@ const checkApiStatus = async () => {
                 };
               }
               io.emit('apiStatus', apiStatus);
+
             } catch (e) {
               console.log("ERROR: ", e.message);
               apiStatus[source.id] = {
@@ -88,7 +90,7 @@ const checkApiStatus = async () => {
                 name: source.name,
                 status: '❤️',
                 endpoint: source.endpoint,
-                error: error.message,
+                error: e.message,
                 sources: []
               };
               io.emit('apiStatus', apiStatus);
@@ -119,13 +121,17 @@ const checkApiStatus = async () => {
        io.emit('apiStatus', apiStatus);
     }
   }
+
+  setTimeout(() => {
+    checkApiStatus();
+  }, MONITORING_FREQUENCY);
+
 }
 
 
 
-const MONITORING_FREQUENCY = 5 * 1000; // check API status every 5 seconds
 
-setInterval(() => {
+setTimeout(() => {
   checkApiStatus();
 }, MONITORING_FREQUENCY);
 
