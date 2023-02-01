@@ -7,7 +7,10 @@ const axios = require("axios");
 
 const MONITORING_FREQUENCY = 5 * 1000; // check API status every 5 seconds
 
-// 💚  ❤️
+const StatusIcon = {
+  Success: "💚",
+  Failure: "💔"
+}
 
 io.on('connection', (socket) => {
   console.log('a client connected');
@@ -44,25 +47,33 @@ const monitorApi = async () => {
         apiStatus[id] = {
           id: id,
           name: name,
-          status: '💚',
+          status: StatusIcon.Success,
           endpoint: endpoint,
           responseTime: responseTime,
           lastHealthy: new Date(),
-          sources: sources
         };
 
         io.emit('apiStatus', apiStatus);
-        console.log(`Checking sources...`, sources);
+      } else {
+        apiStatus[id] = {
+          id: id,
+          name: name,
+          status: StatusIcon.Failure,
+          endpoint: endpoint,
+          responseTime: responseTime,
+          error: response.status
+        };
+
+        io.emit('apiStatus', apiStatus);
       }
     } catch (e) {
         console.log("ERROR: ", e.message);
         apiStatus[id] = {
           id: id,
           name: name,
-          status: '❤️',
+          status: StatusIcon.Failure,
           endpoint: endpoint,
           error: e.message,
-          sources: sources
        };
        io.emit('apiStatus', apiStatus);
     }
