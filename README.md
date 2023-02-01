@@ -5,7 +5,6 @@ A basic dashboard to monitor API endpionts
 
 ```
 npm i
-
 ```
 
 # Start the app
@@ -15,6 +14,8 @@ npm start
 ```
 
 # TODOS
-[ ] Externalize the API URL configuration
+[❌] Externalize the API URL configuration
+[✔️] Inline API end point configuration
+[✔️]  WebSocket Integration
 
 
