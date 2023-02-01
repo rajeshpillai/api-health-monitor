@@ -20,16 +20,17 @@ io.on('connection', (socket) => {
 let apiStatus = {};
 
 const apiEndpoints = [
-  { id: 1, name: 'API 1', endpoint: 'https://api1.com/status' },
+  { id: 1, name: 'API 1', endpoint: 'http://api1.com/status' },
   { id: 2, name: 'API 2', endpoint: 'https://jsonplaceholder.typicode.com/posts/1', sources: [
     { id: 1.1, name: 'Source API 1', endpoint: 'https://api1.com/status' },
   ] },
   { id: 3, name: 'API 3', endpoint: 'https://jsonplaceholder.typicode.com/todos/1'},
   { id: 4, name: 'API 4', endpoint: 'https://jsonplaceholder.typicode.com/posts/1'},
-  { id: 5, name: 'API 5', endpoint: 'https://api2.com/status' },
+  { id: 5, name: 'API 5', endpoint: 'http://api2.com/status' },
+  { id: 6, name: 'API 6', endpoint: 'https://jsonplaceholder.typicode.com/posts/3'},
 ];
 
-const checkApiStatus = async () => {
+const monitorApi = async () => {
   console.log(`Total API Endpoints ${apiEndpoints.length}`);
   for (let i = 0; i < apiEndpoints.length; i++) {
     const api = apiEndpoints[i];
@@ -123,14 +124,14 @@ const checkApiStatus = async () => {
   }
 
   setTimeout(() => {
-    checkApiStatus();
+    monitorApi();
   }, MONITORING_FREQUENCY);
 
 }
 
 
 setTimeout(() => {
-  checkApiStatus();
+  monitorApi();
 }, MONITORING_FREQUENCY);
 
 
