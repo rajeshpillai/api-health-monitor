@@ -11,7 +11,7 @@
     </head>
     <body class="container">
       <h1>API Health Status</h1>
-      <table id="api-status-table" class="table tables-striped table-condensed">
+      <table id="api-status-table" class="table tables-striped table-dark">
         <thead>
           <tr>
             <th>Id</th>
@@ -20,6 +20,7 @@
             <th>Status</th>
             <th>Response Time (ms)</th>
             <th>Last Healthy</th>
+            <th>Error</th>
           </tr>
         </thead>
         <tbody id="api-body">
@@ -34,11 +35,11 @@
       // Function to update or add a row to the table
       const updateTable = (apiStatus, parentId = undefined) => {
         if (_.isEmpty( apiStatus )) return;
+        if (!apiStatus.id) return;
 
         let rowId = `api-${_.replace(apiStatus.id, ".", "_")}`;
 
         let row = $('#' + rowId);
-        console.log("Rendering: ", apiStatus);
         if (row.length == 0) {
           // Add a new row if it does not exist
           
