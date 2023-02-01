@@ -4,6 +4,8 @@ const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const axios = require("axios");
 
+// 💚  ❤️
+
 io.on('connection', (socket) => {
   console.log('a client connected');
 
@@ -11,56 +13,115 @@ io.on('connection', (socket) => {
   socket.emit('apiStatus', apiStatus);
 });
 
+
 let apiStatus = {};
+
 const apiEndpoints = [
   { id: 1, name: 'API 1', endpoint: 'https://api1.com/status' },
-  { id: 2, name: 'API 3', endpoint: 'https://jsonplaceholder.typicode.com/todos/1'},
-  { id: 3, name: 'API 4', endpoint: 'https://jsonplaceholder.typicode.com/posts/1'},
-  { id: 4, name: 'API 5', endpoint: 'https://api2.com/status' },
+  { id: 2, name: 'API 2', endpoint: 'https://api2.com/status', sources: [
+    { id: 1.1, name: 'Source API 1', endpoint: 'https://api1.com/status' },
+    { id: 1.2, name: 'Source API 2', endpoint: 'https://api2.com/status' },
+  ] },
+  { id: 3, name: 'API 3', endpoint: 'https://jsonplaceholder.typicode.com/todos/1'},
+  { id: 4, name: 'API 4', endpoint: 'https://jsonplaceholder.typicode.com/posts/1'},
+  { id: 5, name: 'API 5', endpoint: 'https://api2.com/status' },
 ];
 
-const checkApiStatus = () => {
-  apiEndpoints.forEach(api => {
-    const { id, name,  endpoint } = api;
+const checkApiStatus = async () => {
+  console.log(`Total API Endpoints ${apiEndpoints.length}`);
+  for (let i = 0; i < apiEndpoints.length; i++) {
+    console.log(i);
+    const api = apiEndpoints[i];
+    const { id, name, endpoint, sources } = api;
     console.log(`Checking ${name}...`);
 
     const start = Date.now();
-    axios
-      .get(endpoint)
-      .then(response => {
-        const responseTime = Date.now() - start;
-        if (response.status >= 200 && response.status < 300) {
-          apiStatus[id] = {
-            id: id, 
-            name: name,
-            status: '💚',
-            endpoint: endpoint,
-            responseTime: responseTime,
-            lastHealthy: new Date()
-          };
-        } else {
-          apiStatus[id] = {
-            id: id, 
-            name: name,
-            status: '❤️',
-            endpoint: endpoint,
-            responseTime: responseTime
-          };
+    try {
+      const response = await axios.get(endpoint);
+      const responseTime = Date.now() - start;
+      if (response.status >= 200 && response.status < 300) {
+        apiStatus[id] = {
+          id: id,
+          name: name,
+          status: '💚',
+          endpoint: endpoint,
+          responseTime: responseTime,
+          lastHealthy: new Date(),
+          sources: sources
+        };
+
+        io.emit('apiStatus', apiStatus);
+        console.log(`Checking sources...`, sources);
+        if (sources) {
+          for (let s = 0; s < sources.length; s++) {
+            let source = sources[s];
+            console.log(`Checking source ${source.name} of ${name}...`);
+            try {
+              const response = await axios.get(source.endpoint);
+              if (response.status >= 200 && response.status < 300) {
+                apiStatus[source.id] = {
+                  id: source.id,
+                  name: source.name,
+                  status: '💚',
+                  endpoint: source.endpoint,
+                  responseTime: Date.now() - start,
+                  lastHealthy: new Date(),
+                  sources: []
+
+                };
+              } else {
+                apiStatus[source.id] = {
+                  id: source.id,
+                  name: source.name, 
+                  status: '❤️',
+                  endpoint: source.endpoint,
+                  responseTime: Date.now() - start,
+                  sources: []
+
+                };
+              }
+              io.emit('apiStatus', apiStatus);
+            } catch (e) {
+              console.log("ERROR: ", e.message);
+              apiStatus[source.id] = {
+                id: source.id,
+                name: source.name,
+                status: '❤️',
+                endpoint: source.endpoint,
+                error: error.message,
+                sources: []
+              };
+              io.emit('apiStatus', apiStatus);
+            }
+          }
+        }
+      } else {
+        apiStatus[id] = {
+          id: id,
+          name: name,
+          status: '💚',
+          endpoint: endpoint,
+          response: responseTime,
+          sources: sources
         }
         io.emit('apiStatus', apiStatus);
-      })
-      .catch(error => {
+      }
+    } catch (e) {
+        console.log("ERROR: ", e.message);
         apiStatus[id] = {
-          id: id, 
+          id: id,
           name: name,
           status: '❤️',
           endpoint: endpoint,
-          error: error.message
-        };
-        io.emit('apiStatus', apiStatus);
-      });
-  });
-};
+          error: e.message,
+          sources: sources
+       };
+       io.emit('apiStatus', apiStatus);
+    }
+  }
+}
+
+
 
 const MONITORING_FREQUENCY = 5 * 1000; // check API status every 5 seconds
 

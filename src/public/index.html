@@ -2,6 +2,7 @@
   <html>
     <head>
       <title>API Health Status</title>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js" integrity="sha512-WFN04846sdKMIP5LKNphMaWzU7YpMyCU245etK3g/2ARYbPK9Ub18eG+ljU96qKRCWh+quCY7yefSmlkQw1ANQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
       <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
       <script src="/socket.io/socket.io.js"></script>
     </head>
@@ -10,6 +11,7 @@
       <table id="api-status-table" border="1">
         <thead>
           <tr>
+            <th>Id</th>
             <th>API Name</th>
             <th>Endpoint</th>
             <th>Status</th>
@@ -17,37 +19,59 @@
             <th>Last Healthy</th>
           </tr>
         </thead>
-        <tbody id="api-status-table-body">
+        <tbody id="api-body">
         </tbody>
       </table>
     </body>
     <script>
       const socket = io();
+
+      const tableBody = $('#api-body');
+
+      // Function to update or add a row to the table
+      const updateTable = (apiStatus) => {
+        if (_.isEmpty( apiStatus )) return;
+
+        let rowId = `api-${_.replace(apiStatus.id, ".", "_")}`;
+
+        // Check if the row exists
+        //let row = $(`#api-${apiStatus.id}`);
+        let row = $('#' + rowId);
+        console.log(row.attr("id"));
+        if (row.length == 0) {
+          // Add a new row if it does not exist
+          row = $('<tr>').attr('id', rowId);
+          row.append($('<td>').text(apiStatus.id));
+          row.append($('<td>').text(apiStatus.name));
+          row.append($('<td>').text(apiStatus.status));
+          row.append($('<td>').text(apiStatus.endpoint));
+          row.append($('<td>').text(apiStatus.responseTime));
+          row.append($('<td>').text(apiStatus.lastHealthy || ''));
+          row.append($('<td>').text(apiStatus.error || ''));
+          tableBody.append(row);
+        } else {
+          // Update the existing row
+          $(`#api-${apiStatus.id} td:nth-child(3)`).text(apiStatus.status);
+          $(`#api-${apiStatus.id} td:nth-child(4)`).text(apiStatus.endpoint);
+          $(`#api-${apiStatus.id} td:nth-child(5)`).text(apiStatus.responseTime);
+          $(`#api-${apiStatus.id} td:nth-child(6)`).text(apiStatus.lastHealthy || '');
+          $(`#api-${apiStatus.id} td:nth-child(7)`).text(apiStatus.error || '');
+        }
+
+        // Check if there are sources
+        if (apiStatus.sources) {
+          console.log("Checking sources...");
+          apiStatus.sources.forEach(source => {
+            updateTable(source);
+          });
+        }
+      };
+
       socket.on('apiStatus', (apiStatus) => {
-        console.log(apiStatus);
-        const apiStatusTableBody = $('#api-status-table-body');
+        
         for (const id in apiStatus) {
-          const api = apiStatus[id];
-          const rowId = `${id}-row`;
-          let row = $(`#${rowId}`);
-          console.log(row.length);
-          if (row.length == 0) {
-            row = $(`
-              <tr id="${rowId}">
-                <td>${api.name}</td>
-                <td>${api.endpoint}</td>
-                <td>${api.status}</td>
-                <td>${api.responseTime}</td>
-                <td>${api.lastHealthy ? api.lastHealthy.toString() : ''}</td>
-              </tr>
-            `);
-            apiStatusTableBody.append(row);
-          } else {
-            row.find('td:eq(2)').text(api.status);
-            row.find('td:eq(3)').text(api.responseTime);
-            row.find('td:eq(4)').text(api.lastHealthy ? api.lastHealthy.toString() : '');
-          }
+          updateTable(apiStatus[id]);
         }
       });
-    </script>
+      </script>
   </html>
