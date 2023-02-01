@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+    <script>
+      $(document).ready(function() {
+        const socket = io("http://localhost:3000");
+        const apiEndpoints = [
+          { id: 1, name: 'API 1', endpoint: 'http://api1.com/status' },
+          { id: 2, name: 'API 2', endpoint: 'https://jsonplaceholder.typicode.com/posts/1'},
+          { id: 2.1, name: 'Source API 1', endpoint: 'https://jsonplaceholder.typicode.com/posts/1/comments' },
+          { id: 3, name: 'API 3', endpoint: 'https://jsonplaceholder.typicode.com/todos/1'},
+          { id: 4, name: 'API 4', endpoint: 'https://jsonplaceholder.typicode.com/posts/1'},
+          { id: 5, name: 'API 5', endpoint: 'http://api2.com/status' },
+          { id: 6, name: 'API 6', endpoint: 'https://jsonplaceholder.typicode.com/posts/3'},
+        ];
+
+        const table = $("<table></table>");
+        table.append("<tr><th>ID</th><th>Name</th><th>Endpoint</th><th>Status</th></tr>");
+
+        for (let i = 0; i < apiEndpoints.length; i++) {
+          const row = $("<tr></tr>");
+          row.append("<td>" + apiEndpoints[i].id + "</td>");
+          row.append("<td>" + apiEndpoints[i].name + "</td>");
+          row.append("<td>" + apiEndpoints[i].endpoint + "</td>");
+          row.append("<td class='status'>" + "Unknown" + "</td>");
+          table.append(row);
+        }
+
+        $("body").append(table);
+
+        function checkHealth() {
+          for (let i = 0; i < apiEndpoints.length; i++) {
+            const endpoint = apiEndpoints[i].endpoint;
+            $.get("http://localhost:3000/check?endpoint=" + endpoint, function(data) {
+              const status = data.status;
+              $("tr").each(function() {
+                if ($(this).find("td:eq(2)").text() === endpoint) {
+                  $(this).find(".status").text(status);
+                }
+              });
+            });
+          }
+        }
+
+        checkHealth();
+        setInterval(checkHealth, 5000);
+      });
+    </script>
+  </head>
+  <body>
+  </body>
+</html>

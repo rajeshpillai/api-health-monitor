@@ -87,13 +87,35 @@ const monitorApi = async () => {
 
 
 setTimeout(() => {
-  monitorApi();
+  //monitorApi();
 }, MONITORING_FREQUENCY);
 
 
 app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/public/index.html');
+  //res.sendFile(__dirname + '/public/index.html');
+  res.send({status: "ok"})
 });
+
+app.get('/health', (req, res) => {
+  res.sendFile(__dirname + '/public/index2.html');
+});
+
+app.get("/check", function(req, res) {
+  const endpoint = req.query.endpoint;
+  console.log(`Checking ${endpoint}`);
+  axios
+    .get(endpoint)
+    .then(response => {
+      // the endpoint is healthy
+      res.send({ status: "Healthy" });
+    })
+    .catch(error => {
+      // the endpoint is unhealthy
+      res.send({ status: "Unhealthy" });
+    });
+});
+
+
 
 http.listen(3000, () => {
   console.log('listening on *:3000');
