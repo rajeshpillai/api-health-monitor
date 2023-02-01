@@ -35,6 +35,7 @@
             row = $(`
               <tr id="${rowId}">
                 <td>${api.name}</td>
+                <td>${api.endpoint}</td>
                 <td>${api.status}</td>
                 <td>${api.responseTime}</td>
                 <td>${api.lastHealthy ? api.lastHealthy.toString() : ''}</td>
@@ -42,9 +43,9 @@
             `);
             apiStatusTableBody.append(row);
           } else {
-            row.find('td:eq(1)').text(api.status);
-            row.find('td:eq(2)').text(api.responseTime);
-            row.find('td:eq(3)').text(api.lastHealthy ? api.lastHealthy.toString() : '');
+            row.find('td:eq(2)').text(api.status);
+            row.find('td:eq(3)').text(api.responseTime);
+            row.find('td:eq(4)').text(api.lastHealthy ? api.lastHealthy.toString() : '');
           }
         }
       });

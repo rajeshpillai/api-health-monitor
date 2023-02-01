@@ -33,7 +33,7 @@ const checkApiStatus = () => {
           apiStatus[id] = {
             id: id, 
             name: name,
-            status: 'healthy',
+            status: '💚',
             endpoint: endpoint,
             responseTime: responseTime,
             lastHealthy: new Date()
@@ -42,7 +42,7 @@ const checkApiStatus = () => {
           apiStatus[id] = {
             id: id, 
             name: name,
-            status: 'unhealthy',
+            status: '❤️',
             endpoint: endpoint,
             responseTime: responseTime
           };
@@ -53,7 +53,7 @@ const checkApiStatus = () => {
         apiStatus[id] = {
           id: id, 
           name: name,
-          status: 'unhealthy',
+          status: '❤️',
           endpoint: endpoint,
           error: error.message
         };
