@@ -24,20 +24,28 @@
     <script>
       const socket = io();
       socket.on('apiStatus', (apiStatus) => {
+        console.log(apiStatus);
         const apiStatusTableBody = $('#api-status-table-body');
-        apiStatusTableBody.empty();
-        for (const name in apiStatus) {
-          const api = apiStatus[name];
-          const row = `
-            <tr>
-              <td>${name}</td>
-              <td>${api.endpoint}</td>
-              <td>${api.status}</td>
-              <td>${api.responseTime}</td>
-              <td>${api.lastHealthy ? api.lastHealthy.toString() : ''}</td>
-            </tr>
-          `;
-          apiStatusTableBody.append(row);
+        for (const id in apiStatus) {
+          const api = apiStatus[id];
+          const rowId = `${id}-row`;
+          let row = $(`#${rowId}`);
+          console.log(row.length);
+          if (row.length == 0) {
+            row = $(`
+              <tr id="${rowId}">
+                <td>${api.name}</td>
+                <td>${api.status}</td>
+                <td>${api.responseTime}</td>
+                <td>${api.lastHealthy ? api.lastHealthy.toString() : ''}</td>
+              </tr>
+            `);
+            apiStatusTableBody.append(row);
+          } else {
+            row.find('td:eq(1)').text(api.status);
+            row.find('td:eq(2)').text(api.responseTime);
+            row.find('td:eq(3)').text(api.lastHealthy ? api.lastHealthy.toString() : '');
+          }
         }
       });
     </script>

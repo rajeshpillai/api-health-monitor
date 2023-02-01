@@ -13,15 +13,15 @@ io.on('connection', (socket) => {
 
 let apiStatus = {};
 const apiEndpoints = [
-  { name: 'API 1', endpoint: 'https://api1.com/status' },
-  { name: 'API 3', endpoint: 'https://jsonplaceholder.typicode.com/todos/1'},
-  { name: 'API 4', endpoint: 'https://jsonplaceholder.typicode.com/posts/1'},
-  { name: 'API 5', endpoint: 'https://api2.com/status' },
+  { id: 1, name: 'API 1', endpoint: 'https://api1.com/status' },
+  { id: 2, name: 'API 3', endpoint: 'https://jsonplaceholder.typicode.com/todos/1'},
+  { id: 3, name: 'API 4', endpoint: 'https://jsonplaceholder.typicode.com/posts/1'},
+  { id: 4, name: 'API 5', endpoint: 'https://api2.com/status' },
 ];
 
 const checkApiStatus = () => {
   apiEndpoints.forEach(api => {
-    const { name, endpoint } = api;
+    const { id, name,  endpoint } = api;
     console.log(`Checking ${name}...`);
 
     const start = Date.now();
@@ -30,39 +30,44 @@ const checkApiStatus = () => {
       .then(response => {
         const responseTime = Date.now() - start;
         if (response.status >= 200 && response.status < 300) {
-          apiStatus[name] = {
+          apiStatus[id] = {
+            id: id, 
+            name: name,
             status: 'healthy',
             endpoint: endpoint,
             responseTime: responseTime,
             lastHealthy: new Date()
           };
         } else {
-          apiStatus[name] = {
+          apiStatus[id] = {
+            id: id, 
+            name: name,
             status: 'unhealthy',
             endpoint: endpoint,
             responseTime: responseTime
           };
         }
+        io.emit('apiStatus', apiStatus);
       })
       .catch(error => {
-        apiStatus[name] = {
+        apiStatus[id] = {
+          id: id, 
+          name: name,
           status: 'unhealthy',
           endpoint: endpoint,
           error: error.message
         };
+        io.emit('apiStatus', apiStatus);
       });
   });
 };
 
-const MONITORING_FREQUENCY = 5 * 1000; // check API status every 60 seconds
+const MONITORING_FREQUENCY = 5 * 1000; // check API status every 5 seconds
+
 setInterval(() => {
   checkApiStatus();
-
-  // emit the updated API status to all connected clients
-  io.emit('apiStatus', apiStatus);
-  console.log({apiStatus});
-
 }, MONITORING_FREQUENCY);
+
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/public/index.html');
